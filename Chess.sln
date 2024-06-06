@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess", "Chess\Chess.csproj", "{213A408D-F5ED-44A4-9D6E-D46AC810ACF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monogame.ImGuiNet", "MonoGame.ImGuiNet\MonoGame.ImGuiNet\Monogame.ImGuiNet.csproj", "{CD53EBEB-09F6-416B-AFA7-3C950C370096}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{213A408D-F5ED-44A4-9D6E-D46AC810ACF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{213A408D-F5ED-44A4-9D6E-D46AC810ACF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{213A408D-F5ED-44A4-9D6E-D46AC810ACF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{213A408D-F5ED-44A4-9D6E-D46AC810ACF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD53EBEB-09F6-416B-AFA7-3C950C370096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD53EBEB-09F6-416B-AFA7-3C950C370096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD53EBEB-09F6-416B-AFA7-3C950C370096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD53EBEB-09F6-416B-AFA7-3C950C370096}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
