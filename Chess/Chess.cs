@@ -45,7 +45,7 @@ public class Chess : Game
     {
         spriteBatch = new(GraphicsDevice);
 
-        Board.PiecesTexture = Content.Load<Texture2D>("pieces.png");
+        Board.PiecesTexture = Content.Load<Texture2D>("pieces");
 
         imGuiRenderer.RebuildFontAtlas();
     }

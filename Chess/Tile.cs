@@ -6,24 +6,23 @@ namespace Chess;
 
 public class Tile
 {
-    public const float Size = 64f;
+    public const float Size = 110f;
 
     private static readonly Color WhiteColor = new(0xED, 0xD6, 0xB0);
     private static readonly Color BlackColor = new(0xB8, 0x87, 0x62);
     
-    public bool White { get; }
-    public bool Black => !White;
+    public bool IsWhite { get; }
+    public bool IsBlack => !IsWhite;
     
-    public Point Position { get; }
+    public Point TilePosition { get; }
+    public Vector2 Position => TilePosition.ToVector2() * Size;
 
-    public Tile(Point position, bool isWhite)
+    public Tile(Point tilePosition, bool isWhite)
     {
-        Position = position;
-        White = isWhite;
+        TilePosition = tilePosition;
+        IsWhite = isWhite;
     }
 
     public void Render(SpriteBatch spriteBatch, Vector2 offset)
-    {
-        spriteBatch.DrawRectangle(offset + Position.ToVector2() * Size, new(Size, Size), White ? WhiteColor : BlackColor, Size / 2f);
-    }
+        => spriteBatch.DrawRectangle(offset + Position, new(Size, Size), IsWhite ? WhiteColor : BlackColor, Size / 2f);
 }
