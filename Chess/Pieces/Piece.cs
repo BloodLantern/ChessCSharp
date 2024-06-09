@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using MonoGame.Extended.Input;
 
 namespace Chess.Pieces;
 
@@ -21,6 +22,7 @@ public abstract class Piece
         set
         {
             tile = value;
+            tile.Piece = this;
             Position = value.Position + Vector2.One * Tile.Size * 0.5f;
         }
     }
@@ -33,7 +35,7 @@ public abstract class Piece
         IsWhite = isWhite;
     }
 
-    public void Render(SpriteBatch spriteBatch, Vector2 offset)
+    public void Draw(SpriteBatch spriteBatch, Vector2 offset)
         => spriteBatch.Draw(
             Board.PiecesTexture,
             offset + Position,
@@ -45,4 +47,9 @@ public abstract class Piece
             SpriteEffects.None,
             0f
         );
+
+    public void Update(KeyboardStateExtended keyboard, MouseStateExtended mouse)
+    {
+        
+    }
 }

@@ -1,6 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ImGuiNET;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input;
 using MonoGame.ImGuiNet;
 
 namespace Chess;
@@ -52,10 +53,16 @@ public class Chess : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-            Exit();
+        KeyboardExtended.Refresh();
+        MouseExtended.Refresh();
 
-        // TODO: Add your update logic here
+        if (IsActive)
+        {
+            KeyboardStateExtended keyboard = KeyboardExtended.GetState();
+            MouseStateExtended mouse = MouseExtended.GetState();
+
+            board.Update(keyboard, mouse);
+        }
 
         base.Update(gameTime);
     }
@@ -66,10 +73,14 @@ public class Chess : Game
 
         spriteBatch.Begin();
         
-        board.Render(spriteBatch);
+        board.Draw(spriteBatch);
         
         spriteBatch.End();
 
         base.Draw(gameTime);
+
+        imGuiRenderer.BeginLayout(gameTime);
+        
+        imGuiRenderer.EndLayout();
     }
 }

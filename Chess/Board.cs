@@ -2,6 +2,7 @@
 using Chess.Pieces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.Input;
 
 namespace Chess;
 
@@ -22,7 +23,7 @@ public class Board
         for (int x = 0; x < Size; x++)
         {
             for (int y = 0; y < Size; y++)
-                Tiles[x, y] = new(new(x, y), (x + y) % 2 == 0);
+                Tiles[x, y] = new(this, new(x, y), (x + y) % 2 == 0);
         }
 
         for (int i = 0; i < 2; i++)
@@ -43,12 +44,27 @@ public class Board
         }
     }
 
-    public void Render(SpriteBatch spriteBatch)
+    public void Draw(SpriteBatch spriteBatch)
     {
         foreach (Tile tile in Tiles)
-            tile.Render(spriteBatch, DrawOffset);
+            tile.Draw(spriteBatch, DrawOffset);
 
         foreach (Piece piece in Pieces)
-            piece.Render(spriteBatch, DrawOffset);
+            piece.Draw(spriteBatch, DrawOffset);
+    }
+
+    public void Update(KeyboardStateExtended keyboard, MouseStateExtended mouse)
+    {
+        foreach (Tile tile in Tiles)
+            tile.Update(keyboard, mouse);
+
+        foreach (Piece piece in Pieces)
+            piece.Update(keyboard, mouse);
+    }
+
+    public void ResetTileSelection()
+    {
+        foreach (Tile tile in Tiles)
+            tile.State = Tile.SelectionState.Default;
     }
 }
