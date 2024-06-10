@@ -1,8 +1,9 @@
-﻿using ImGuiNET;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using MonoGame.Extended.Input;
 using MonoGame.ImGuiNet;
+using MonoGame.Utils;
 
 namespace Chess;
 
@@ -14,9 +15,13 @@ public class Chess : Game
     private SpriteBatch spriteBatch;
     private ImGuiRenderer imGuiRenderer;
 
+    private FramesPerSecondCounterComponent fpsCounter;
+
     public int WindowWidth { get => Window.ClientBounds.Width; init => graphics.PreferredBackBufferWidth = value; }
     public int WindowHeight { get => Window.ClientBounds.Height; init => graphics.PreferredBackBufferHeight = value; }
     public Point WindowSize => Window.ClientBounds.Size;
+
+    private SpriteFont font;
 
     private Board board;
 
@@ -30,6 +35,8 @@ public class Chess : Game
 
         WindowWidth = 1600;
         WindowHeight = 900;
+        IsFixedTimeStep = false;
+        graphics.SynchronizeWithVerticalRetrace = true;
         Window.AllowUserResizing = true;
     }
 
@@ -38,6 +45,8 @@ public class Chess : Game
         imGuiRenderer = new(this);
         
         board = new();
+        
+        Components.Add(fpsCounter = new(this));
 
         base.Initialize();
     }
@@ -46,6 +55,7 @@ public class Chess : Game
     {
         spriteBatch = new(GraphicsDevice);
 
+        font = Content.Load<SpriteFont>("font");
         Board.PiecesTexture = Content.Load<Texture2D>("pieces");
 
         imGuiRenderer.RebuildFontAtlas();
@@ -63,6 +73,21 @@ public class Chess : Game
 
             board.Update(keyboard, mouse);
         }
+        
+        foreach (IGameComponent component in Components)
+        {
+            switch (component)
+            {
+                case IUpdate update:
+                    update.Update(gameTime);
+                    break;
+                case IUpdateable updateable:
+                    updateable.Update(gameTime);
+                    break;
+            }
+        }
+        
+        Coroutine.UpdateAll(gameTime);
 
         base.Update(gameTime);
     }
@@ -71,15 +96,30 @@ public class Chess : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
+        imGuiRenderer.BeginLayout(gameTime);
+
         spriteBatch.Begin();
         
         board.Draw(spriteBatch);
         
+        foreach (IGameComponent component in Components)
+        {
+            switch (component)
+            {
+                case DrawableGameComponent drawableComponent:
+                    drawableComponent.Draw(gameTime);
+                    break;
+                case IDrawable drawable:
+                    drawable.Draw(gameTime);
+                    break;
+            }
+        }
+        
+        spriteBatch.DrawString(font, $"FPS: {fpsCounter.FramesPerSecond}", Vector2.Zero, Color.White);
+        
         spriteBatch.End();
 
         base.Draw(gameTime);
-
-        imGuiRenderer.BeginLayout(gameTime);
         
         imGuiRenderer.EndLayout();
     }

@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess", "Chess\Chess.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monogame.ImGuiNet", "MonoGame.ImGuiNet\MonoGame.ImGuiNet\Monogame.ImGuiNet.csproj", "{CD53EBEB-09F6-416B-AFA7-3C950C370096}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Utils", "MonoGame.Utils\MonoGame.Utils\MonoGame.Utils.csproj", "{75465F82-0F55-41CE-990D-55F07FA7CFA3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{CD53EBEB-09F6-416B-AFA7-3C950C370096}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD53EBEB-09F6-416B-AFA7-3C950C370096}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD53EBEB-09F6-416B-AFA7-3C950C370096}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75465F82-0F55-41CE-990D-55F07FA7CFA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75465F82-0F55-41CE-990D-55F07FA7CFA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75465F82-0F55-41CE-990D-55F07FA7CFA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75465F82-0F55-41CE-990D-55F07FA7CFA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

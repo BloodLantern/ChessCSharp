@@ -11,6 +11,8 @@ public abstract class Piece
     private const float TextureScale = 1f / TextureSize * Tile.Size;
     
     public abstract float TextureOffset { get; }
+    public abstract char FenBaseChar { get; }
+    public char FenChar => IsWhite ? FenBaseChar : char.ToLower(FenBaseChar);
     
     public bool IsWhite { get; }
     public bool IsBlack => !IsWhite;
@@ -23,14 +25,17 @@ public abstract class Piece
         {
             tile = value;
             tile.Piece = this;
-            Position = value.Position + Vector2.One * Tile.Size * 0.5f;
+            ResetPosition();
         }
     }
+    
+    public Board Board { get; }
 
     public Vector2 Position { get; set; }
 
-    protected Piece(Tile tile, bool isWhite)
+    protected Piece(Board board, Tile tile, bool isWhite)
     {
+        Board = board;
         Tile = tile;
         IsWhite = isWhite;
     }
@@ -48,8 +53,15 @@ public abstract class Piece
             0f
         );
 
-    public void Update(KeyboardStateExtended keyboard, MouseStateExtended mouse)
+    public void Update(MouseStateExtended mouse)
     {
-        
+        if (!(mouse.IsButtonPressed(MouseButton.Left) && Tile.ScreenArea.Contains(mouse.Position)))
+            return;
+
+        Board.SelectedPiece = this;
     }
+
+    public void ResetPosition() => Position = Tile.Position + Vector2.One * Tile.Size * 0.5f;
+
+    public override string ToString() => FenChar.ToString();
 }

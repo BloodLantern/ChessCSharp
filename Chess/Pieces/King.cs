@@ -3,9 +3,10 @@
 public class King : Piece
 {
     public override float TextureOffset => TextureSize * 0f;
+    public override char FenBaseChar => 'K';
 
-    public King(Tile tile, bool isWhite)
-        : base(tile, isWhite)
+    public King(Board board, Tile tile, bool isWhite)
+        : base(board, tile, isWhite)
     {
     }
 }

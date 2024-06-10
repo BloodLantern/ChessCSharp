@@ -1,3 +1,6 @@
 [submodule "MonoGame.ImGuiNet"]
 	path = MonoGame.ImGuiNet
 	url = https://github.com/BloodLantern/MonoGame.ImGuiNet.git
+[submodule "MonoGame.Utils"]
+	path = MonoGame.Utils
+	url = https://github.com/BloodLantern/MonoGame.Utils.git

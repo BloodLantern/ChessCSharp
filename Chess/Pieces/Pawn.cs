@@ -3,9 +3,10 @@
 public class Pawn : Piece
 {
     public override float TextureOffset => TextureSize * 5f;
+    public override char FenBaseChar => 'P';
 
-    public Pawn(Tile tile, bool isWhite)
-        : base(tile, isWhite)
+    public Pawn(Board board, Tile tile, bool isWhite)
+        : base(board, tile, isWhite)
     {
     }
 }
