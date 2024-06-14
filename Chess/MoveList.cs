@@ -6,31 +6,39 @@ namespace Chess;
 
 public class MoveList : IEnumerable<Move>
 {
+    public delegate void MoveAction(Move move);
+
     private List<Move> List { get; } = [];
 
     public int Count => List.Count;
-    
-    public int CurrentIndex { get; private set; }
+
+    public int CurrentIndex { get; private set; } = -1;
     public Move Current => List[CurrentIndex];
 
-    public bool Modified => CurrentIndex == Count - 1;
+    public bool CurrentIsLastMove => CurrentIndex == Count - 1;
+
+    public event MoveAction OnMoveAdded;
+    public event MoveAction OnMoveMade;
+    public event MoveAction OnMoveUnmade;
 
     public void Add(Move move)
     {
-        if (!Modified)
+        if (CurrentIsLastMove)
             CurrentIndex++;
 
         List.Add(move);
+        OnMoveAdded?.Invoke(move);
     }
 
     public void MakeOne(bool animated)
     {
-        if (!Modified)
+        if (CurrentIsLastMove)
             return;
         
         foreach (Move move in List.Where(move => !move.Made))
         {
             move.Make(animated);
+            OnMoveMade?.Invoke(move);
             break;
         }
 
@@ -39,7 +47,7 @@ public class MoveList : IEnumerable<Move>
 
     public void UnmakeOne(bool animated)
     {
-        if (CurrentIndex == 0)
+        if (CurrentIndex == -1)
             return;
 
         for (int i = List.Count - 1; i >= 0; i--)
@@ -49,6 +57,7 @@ public class MoveList : IEnumerable<Move>
                 continue;
                 
             move.Unmake(animated);
+            OnMoveUnmade?.Invoke(move);
             break;
         }
 
@@ -58,7 +67,10 @@ public class MoveList : IEnumerable<Move>
     public void MakeAll()
     {
         foreach (Move move in List.Where(move => !move.Made))
+        {
             move.Make(false);
+            OnMoveMade?.Invoke(move);
+        }
     }
 
     public void UnmakeAll()
@@ -70,6 +82,7 @@ public class MoveList : IEnumerable<Move>
                 continue;
                 
             move.Unmake(false);
+            OnMoveUnmade?.Invoke(move);
         }
     }
 

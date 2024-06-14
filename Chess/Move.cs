@@ -37,11 +37,8 @@ public class Move
 
     public void Make(bool animated)
     {
-        if (Destination.Piece != null)
-        {
-            Board.Pieces.Remove(DestinationPiece);
-            Destination.Piece = null;
-        }
+        if (!animated)
+            RemoveDestinationPiece();
 
         Piece.Tile = Destination;
 
@@ -54,8 +51,7 @@ public class Move
     public void Unmake(bool animated)
     {
         Piece.Tile = Origin;
-        Board.Pieces.Add(DestinationPiece);
-        Destination.Piece = DestinationPiece;
+        AddDestinationPiece();
 
         if (animated)
             Coroutine.Start(AnimationRoutine(Destination, Origin));
@@ -69,18 +65,41 @@ public class Move
         
         Stopwatch stopwatch = Stopwatch.StartNew();
 
+        bool makingMove = origin == Origin;
+        
         Vector2 halfTileSize = Vector2.One * Tile.Size * 0.5f;
         Vector2 start = origin.Position + halfTileSize;
         Vector2 end = destination.Position + halfTileSize;
 
         for (float timer = 0f; timer < Duration; timer += stopwatch.GetElapsedSeconds())
         {
-            Piece.Position = Calc.EaseLerp(start, end, timer, Duration, Ease.CubeOut);
+            Piece.Position = Calc.EaseLerp(start, end, timer, Duration, Ease.Linear);
             
             yield return null;
         }
+
+        if (makingMove)
+            RemoveDestinationPiece();
         
         Piece.Position = destination.Position + halfTileSize;
+    }
+
+    private void RemoveDestinationPiece()
+    {
+        if (Destination.Piece == null)
+            return;
+        
+        Board.Pieces.Remove(DestinationPiece);
+        Destination.Piece = null;
+    }
+
+    private void AddDestinationPiece()
+    {
+        if (DestinationPiece == null)
+            return;
+        
+        Board.Pieces.Add(DestinationPiece);
+        Destination.Piece = DestinationPiece;
     }
 
     public override string ToString() => $"{Piece}{Destination}";

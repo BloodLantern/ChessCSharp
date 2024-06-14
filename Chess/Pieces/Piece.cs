@@ -15,7 +15,6 @@ public abstract class Piece
     public char FenChar => IsWhite ? FenBaseChar : char.ToLower(FenBaseChar);
     
     public bool IsWhite { get; }
-    public bool IsBlack => !IsWhite;
 
     private Tile tile;
     public Tile Tile

@@ -18,17 +18,16 @@ public class Tile
     
     public const float Size = 110f;
 
-    private static readonly Color WhiteColor = new(0xED, 0xD6, 0xB0);
-    private static readonly Color BlackColor = new(0xB8, 0x87, 0x62);
+    private static readonly Color WhiteColor = Color.Transparent;
+    private static readonly Color BlackColor = Color.Transparent;
     private static readonly Color RedWhiteColor = new(0xEB, 0x78, 0x63);
     private static readonly Color RedBlackColor = new(0xE1, 0x68, 0x54);
     private static readonly Color GreenWhiteColor = new(0xB8, 0xCF, 0x6A);
     private static readonly Color GreenBlackColor = new(0xAE, 0xBF, 0x5B);
 
-    private const string rowLetters = "abcdefgh";
+    private const string RowLetters = "abcdefgh";
 
     public bool IsWhite { get; }
-    public bool IsBlack => !IsWhite;
 
     public Board Board { get; }
     public Piece Piece { get; set; }
@@ -84,5 +83,5 @@ public class Tile
             Board.ResetTileSelection();
     }
 
-    public override string ToString() => $"{rowLetters[TilePosition.X]}{TilePosition.Y}";
+    public override string ToString() => $"{RowLetters[TilePosition.X]}{TilePosition.Y}";
 }

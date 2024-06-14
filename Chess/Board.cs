@@ -2,6 +2,8 @@
 using Chess.Pieces;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
@@ -11,19 +13,23 @@ namespace Chess;
 
 public class Board
 {
-    public const int Size = 8;
+    public const int TileSize = 8;
+    public const float Size = Tile.Size * TileSize;
 
-    public static Texture2D PiecesTexture;
-
-    public static Vector2 DrawOffset => Chess.Instance.WindowSize.ToVector2() * 0.5f - Vector2.One * Size * Tile.Size * 0.5f;
+    public Texture2D Texture { get; private set; }
+    public Texture2D PiecesTexture { get; private set; }
     
-    public Tile[,] Tiles { get; } = new Tile[Size, Size];
+    private SoundEffect MovePieceSfx { get; set; }
+
+    public static Vector2 DrawOffset => Chess.Instance.WindowSize.ToVector2() * 0.5f - Vector2.One * Size * 0.5f;
+    
+    public Tile[,] Tiles { get; } = new Tile[TileSize, TileSize];
     public List<Piece> Pieces { get; } = [];
-    public MoveList Moves { get; } = new();
+    public MoveList Moves { get; } = [];
     
     public Piece SelectedPiece { get; set; }
     
-    public static RectangleF Area => new(Vector2.Zero, Vector2.One * Size * Tile.Size);
+    public static RectangleF Area => new(Vector2.Zero, Vector2.One * Size);
     public static RectangleF ScreenArea
     {
         get
@@ -34,11 +40,13 @@ public class Board
         }
     }
 
+    public bool IsWhiteTurn { get; private set; } = true;
+
     public Board()
     {
-        for (int x = 0; x < Size; x++)
+        for (int x = 0; x < TileSize; x++)
         {
-            for (int y = 0; y < Size; y++)
+            for (int y = 0; y < TileSize; y++)
                 Tiles[x, y] = new(this, new(x, y), (x + y) % 2 == 0);
         }
 
@@ -55,9 +63,21 @@ public class Board
             Pieces.Add(new Knight(this, Tiles[6, black ? 0 : 7], !black));
             Pieces.Add(new Rook(this, Tiles[7, black ? 0 : 7], !black));
             
-            for (int j = 0; j < Size; j++)
+            for (int j = 0; j < TileSize; j++)
                 Pieces.Add(new Pawn(this, Tiles[j, black ? 1 : 6], !black));
         }
+
+        Moves.OnMoveAdded += _ => MovePieceSfx!.Play();
+        Moves.OnMoveMade += _ => MovePieceSfx!.Play();
+        Moves.OnMoveUnmade += _ => MovePieceSfx!.Play();
+    }
+
+    public void LoadContent(ContentManager content)
+    {
+        Texture = content.Load<Texture2D>("board");
+        PiecesTexture = content.Load<Texture2D>("pieces");
+
+        MovePieceSfx = content.Load<SoundEffect>("audio/move-self");
     }
 
     public void Update(KeyboardStateExtended keyboard, MouseStateExtended mouse)
@@ -65,7 +85,7 @@ public class Board
         foreach (Tile tile in Tiles)
             tile.Update(keyboard, mouse);
 
-        if (!Moves.Modified)
+        if (Moves.CurrentIsLastMove)
         {
             foreach (Piece piece in Pieces)
                 piece.Update(mouse);
@@ -111,6 +131,8 @@ public class Board
 
     public void Draw(SpriteBatch spriteBatch)
     {
+        spriteBatch.Draw(Texture, DrawOffset, Color.White);
+        
         foreach (Tile tile in Tiles)
             tile.Draw(spriteBatch, DrawOffset);
 
