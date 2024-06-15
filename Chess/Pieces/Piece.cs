@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Input;
@@ -31,6 +32,11 @@ public abstract class Piece
     public Board Board { get; }
 
     public Vector2 Position { get; set; }
+    public Point TilePosition => Tile.TilePosition;
+
+    public List<Tile> ReachableTiles { get; } = [];
+    
+    public bool HasMoved { get; set; }
 
     protected Piece(Board board, Tile tile, bool isWhite)
     {
@@ -54,13 +60,17 @@ public abstract class Piece
 
     public void Update(MouseStateExtended mouse)
     {
-        if (!(mouse.IsButtonPressed(MouseButton.Left) && Tile.ScreenArea.Contains(mouse.Position)))
+        if (!(mouse.IsButtonPressed(MouseButton.Left) && Tile.ScreenArea.Contains(mouse.Position)) || Board.IsWhiteTurn != IsWhite)
             return;
 
         Board.SelectedPiece = this;
     }
 
     public void ResetPosition() => Position = Tile.Position + Vector2.One * Tile.Size * 0.5f;
+
+    public abstract void UpdateReachableTiles();
+
+    public bool IsEnemyOf(Piece other) => IsWhite != other.IsWhite;
 
     public override string ToString() => FenChar.ToString();
 }

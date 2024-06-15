@@ -19,6 +19,8 @@ public class Move
     private Piece DestinationPiece { get; }
     
     public bool Made { get; private set; }
+    
+    public bool FirstPieceMove { get; }
 
     public Move(Board board, Piece piece, Tile destination)
         : this(board, piece, piece.Tile, destination)
@@ -33,6 +35,7 @@ public class Move
         Destination = destination ?? throw new ArgumentNullException(nameof(destination));
 
         DestinationPiece = Destination.Piece;
+        FirstPieceMove = !piece.HasMoved;
     }
 
     public void Make(bool animated)
@@ -41,6 +44,7 @@ public class Move
             RemoveDestinationPiece();
 
         Piece.Tile = Destination;
+        Piece.HasMoved = true;
 
         if (animated)
             Coroutine.Start(AnimationRoutine(Origin, Destination));
@@ -52,6 +56,9 @@ public class Move
     {
         Piece.Tile = Origin;
         AddDestinationPiece();
+
+        if (FirstPieceMove)
+            Piece.HasMoved = false;
 
         if (animated)
             Coroutine.Start(AnimationRoutine(Destination, Origin));

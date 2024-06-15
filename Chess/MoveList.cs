@@ -89,4 +89,6 @@ public class MoveList : IEnumerable<Move>
     public IEnumerator<Move> GetEnumerator() => List.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public Move this[int i] => List[i];
 }

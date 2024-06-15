@@ -9,4 +9,20 @@ public class King : Piece
         : base(board, tile, isWhite)
     {
     }
+    
+    public override void UpdateReachableTiles()
+    {
+        for (int x = -1; x < 1; x++)
+        {
+            for (int y = -1; y < 1; y++)
+            {
+                if (x == 0 && y == 0)
+                    continue;
+
+                Tile tile = Board[TilePosition.X + x, TilePosition.Y + y];
+                if (tile != null && (!tile.HasPiece || tile.Piece.IsEnemyOf(this)))
+                    ReachableTiles.Add(tile);
+            }
+        }
+    }
 }

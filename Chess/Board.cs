@@ -18,6 +18,8 @@ public class Board
 
     public Texture2D Texture { get; private set; }
     public Texture2D PiecesTexture { get; private set; }
+    public Texture2D ReachableTileTexture { get; private set; }
+    public Texture2D ReachableTileEnemyTexture { get; private set; }
     
     private SoundEffect MovePieceSfx { get; set; }
 
@@ -41,6 +43,8 @@ public class Board
     }
 
     public bool IsWhiteTurn { get; private set; } = true;
+
+    private static readonly Color ReachableTileColor = new(Color.Black, 0.15f);
 
     public Board()
     {
@@ -67,7 +71,14 @@ public class Board
                 Pieces.Add(new Pawn(this, Tiles[j, black ? 1 : 6], !black));
         }
 
-        Moves.OnMoveAdded += _ => MovePieceSfx!.Play();
+        UpdatePiecesReachableTiles();
+
+        Moves.OnMoveAdded += _ =>
+        {
+            MovePieceSfx!.Play();
+            UpdatePiecesReachableTiles();
+            IsWhiteTurn = !IsWhiteTurn;
+        };
         Moves.OnMoveMade += _ => MovePieceSfx!.Play();
         Moves.OnMoveUnmade += _ => MovePieceSfx!.Play();
     }
@@ -76,6 +87,8 @@ public class Board
     {
         Texture = content.Load<Texture2D>("board");
         PiecesTexture = content.Load<Texture2D>("pieces");
+        ReachableTileTexture = content.Load<Texture2D>("reachable_tile");
+        ReachableTileEnemyTexture = content.Load<Texture2D>("reachable_tile_enemy");
 
         MovePieceSfx = content.Load<SoundEffect>("audio/move-self");
     }
@@ -107,15 +120,15 @@ public class Board
                     Point tilePosition = (position / Tile.Size).ToPoint();
                     Tile tile = Tiles[tilePosition.X, tilePosition.Y];
 
-                    if (SelectedPiece.Tile == tile)
-                    {
-                        SelectedPiece.ResetPosition();
-                    }
-                    else
+                    if (SelectedPiece.Tile != tile && SelectedPiece.ReachableTiles.Contains(tile))
                     {
                         Move move = new(this, SelectedPiece, tile);
                         move.Make(false);
                         Moves.Add(move);
+                    }
+                    else
+                    {
+                        SelectedPiece.ResetPosition();
                     }
                 }
 
@@ -136,19 +149,46 @@ public class Board
         foreach (Tile tile in Tiles)
             tile.Draw(spriteBatch, DrawOffset);
 
+        if (SelectedPiece != null)
+        {
+            foreach (Tile tile in SelectedPiece.ReachableTiles)
+            {
+                if (tile.HasPiece && tile.Piece.IsEnemyOf(SelectedPiece))
+                    spriteBatch.Draw(ReachableTileEnemyTexture, tile.Position + DrawOffset, null, ReachableTileColor);
+                else
+                    spriteBatch.Draw(ReachableTileTexture, tile.Position + DrawOffset, null, ReachableTileColor);
+            }
+        }
+
         foreach (Piece piece in Pieces)
             piece.Draw(spriteBatch, DrawOffset);
 
-        ImGui.Begin("Moves");
+        ImGui.Begin("Board");
         
+        ImGui.SeparatorText("Info");
+        ImGui.Text($"{(IsWhiteTurn ? "White" : "Black")} to move");
+        ImGui.Text($"Selected piece: {SelectedPiece}");
+        if (SelectedPiece != null && ImGui.TreeNodeEx("Reachable tiles", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            foreach (Tile tile in SelectedPiece.ReachableTiles)
+                ImGui.Text(tile.ToString());
+            ImGui.TreePop();
+        }
+        if (ImGui.Button("Update reachable tiles"))
+            UpdatePiecesReachableTiles();
+        
+        ImGui.SeparatorText("Moves");
         if (ImGui.Button("Make all moves"))
             Moves.MakeAll();
         ImGui.SameLine();
         if (ImGui.Button("Unmake all moves"))
             Moves.UnmakeAll();
 
-        foreach (Move move in Moves)
+        for (int i = 0; i < Moves.Count; i++)
         {
+            Move move = Moves[i];
+            if (i % 2 == 1)
+                ImGui.SameLine(50f);
             ImGui.Text($"{move}");
         }
         
@@ -160,4 +200,26 @@ public class Board
         foreach (Tile tile in Tiles)
             tile.State = Tile.SelectionState.Default;
     }
+
+    private void UpdatePiecesReachableTiles()
+    {
+        foreach (Piece piece in Pieces)
+        {
+            piece.ReachableTiles.Clear();
+            piece.UpdateReachableTiles();
+        }
+    }
+
+    public Tile this[int tileX, int tileY]
+    {
+        get
+        {
+            if (tileX < 0 || tileY < 0 || tileX >= TileSize || tileY >= TileSize)
+                return null;
+            
+            return Tiles[tileX, tileY];
+        }
+    }
+
+    public Tile this[Point tilePos] => this[tilePos.X, tilePos.Y];
 }

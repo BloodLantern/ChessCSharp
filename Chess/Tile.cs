@@ -62,6 +62,8 @@ public class Tile
         }
     }
 
+    public bool HasPiece => Piece != null;
+
     private Color drawColor;
 
     public Tile(Board board, Point tilePosition, bool isWhite)
@@ -73,7 +75,12 @@ public class Tile
     }
 
     public void Draw(SpriteBatch spriteBatch, Vector2 offset)
-        => spriteBatch.DrawRectangle(offset + Position, new(Size, Size), drawColor, Size * 0.5f);
+    {
+        if (drawColor == Color.Transparent)
+            return;
+        
+        spriteBatch.DrawRectangle(offset + Position, new(Size, Size), drawColor, Size * 0.5f);
+    }
 
     public void Update(KeyboardStateExtended keyboard, MouseStateExtended mouse)
     {
@@ -83,5 +90,5 @@ public class Tile
             Board.ResetTileSelection();
     }
 
-    public override string ToString() => $"{RowLetters[TilePosition.X]}{TilePosition.Y}";
+    public override string ToString() => $"{RowLetters[TilePosition.X]}{TilePosition.Y + 1}";
 }
