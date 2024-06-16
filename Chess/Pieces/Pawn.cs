@@ -8,24 +8,27 @@ public class Pawn : Piece
     public override char FenBaseChar => 'P';
 
     public int MoveDirection { get; } 
+    
+    private int StartingY { get; }
 
     public Pawn(Board board, Tile tile, bool isWhite)
         : base(board, tile, isWhite)
     {
         MoveDirection = IsWhite ? -1 : 1;
+        StartingY = IsWhite ? 6 : 1;
     }
     
     public override void UpdateReachableTiles()
     {
         Point forwardPosition = new(TilePosition.X, TilePosition.Y + MoveDirection);
         Tile forwardTile = Board[forwardPosition];
-        
+
         if (!forwardTile.HasPiece)
         {
             ReachableTiles.Add(forwardTile);
 
             // Initial 2-tiles move
-            if (!HasMoved)
+            if (StartingY == TilePosition.Y)
             {
                 Tile forwardForwardTile = Board[forwardPosition.X, forwardPosition.Y + MoveDirection];
                 if (!forwardForwardTile.HasPiece)

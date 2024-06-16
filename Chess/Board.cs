@@ -2,7 +2,6 @@
 using Chess.Pieces;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,14 +13,13 @@ namespace Chess;
 public class Board
 {
     public const int TileSize = 8;
+    public const int FirstTileIndex = 0;
+    public const int LastTileIndex = TileSize - 1;
     public const float Size = Tile.Size * TileSize;
 
-    public Texture2D Texture { get; private set; }
-    public Texture2D PiecesTexture { get; private set; }
-    public Texture2D ReachableTileTexture { get; private set; }
-    public Texture2D ReachableTileEnemyTexture { get; private set; }
-    
-    private SoundEffect MovePieceSfx { get; set; }
+    private static Texture2D Texture { get; set; }
+    private static Texture2D ReachableTileTexture { get; set; }
+    private static Texture2D ReachableTileEnemyTexture { get; set; }
 
     public static Vector2 DrawOffset => Chess.Instance.WindowSize.ToVector2() * 0.5f - Vector2.One * Size * 0.5f;
     
@@ -45,6 +43,9 @@ public class Board
     public bool IsWhiteTurn { get; private set; } = true;
 
     private static readonly Color ReachableTileColor = new(Color.Black, 0.15f);
+    
+    public King WhiteKing { get; }
+    public King BlackKing { get; }
 
     public Board()
     {
@@ -57,40 +58,42 @@ public class Board
         for (int i = 0; i < 2; i++)
         {
             bool black = i == 0;
+            int y = black ? FirstTileIndex : LastTileIndex;
             
-            Pieces.Add(new Rook(this, Tiles[0, black ? 0 : 7], !black));
-            Pieces.Add(new Knight(this, Tiles[1, black ? 0 : 7], !black));
-            Pieces.Add(new Bishop(this, Tiles[2, black ? 0 : 7], !black));
-            Pieces.Add(new Queen(this, Tiles[3, black ? 0 : 7], !black));
-            Pieces.Add(new King(this, Tiles[4, black ? 0 : 7], !black));
-            Pieces.Add(new Bishop(this, Tiles[5, black ? 0 : 7], !black));
-            Pieces.Add(new Knight(this, Tiles[6, black ? 0 : 7], !black));
-            Pieces.Add(new Rook(this, Tiles[7, black ? 0 : 7], !black));
+            Pieces.Add(new Rook(this, Tiles[FirstTileIndex + 0, y], !black));
+            Pieces.Add(new Knight(this, Tiles[FirstTileIndex + 1, y], !black));
+            Pieces.Add(new Bishop(this, Tiles[FirstTileIndex + 2, y], !black));
+            Pieces.Add(new Queen(this, Tiles[FirstTileIndex + 3, y], !black));
+            
+            King king = new(this, Tiles[LastTileIndex - 3, y], !black);
+            if (black)
+                BlackKing = king;
+            else
+                WhiteKing = king;
+            Pieces.Add(king);
+            
+            Pieces.Add(new Bishop(this, Tiles[LastTileIndex - 2, y], !black));
+            Pieces.Add(new Knight(this, Tiles[LastTileIndex - 1, y], !black));
+            Pieces.Add(new Rook(this, Tiles[LastTileIndex - 0, y], !black));
             
             for (int j = 0; j < TileSize; j++)
-                Pieces.Add(new Pawn(this, Tiles[j, black ? 1 : 6], !black));
+                Pieces.Add(new Pawn(this, Tiles[j, black ? FirstTileIndex + 1 : LastTileIndex - 1], !black));
         }
 
         UpdatePiecesReachableTiles();
 
         Moves.OnMoveAdded += _ =>
         {
-            MovePieceSfx!.Play();
             UpdatePiecesReachableTiles();
             IsWhiteTurn = !IsWhiteTurn;
         };
-        Moves.OnMoveMade += _ => MovePieceSfx!.Play();
-        Moves.OnMoveUnmade += _ => MovePieceSfx!.Play();
     }
 
-    public void LoadContent(ContentManager content)
+    internal static void LoadContent(ContentManager content)
     {
         Texture = content.Load<Texture2D>("board");
-        PiecesTexture = content.Load<Texture2D>("pieces");
         ReachableTileTexture = content.Load<Texture2D>("reachable_tile");
         ReachableTileEnemyTexture = content.Load<Texture2D>("reachable_tile_enemy");
-
-        MovePieceSfx = content.Load<SoundEffect>("audio/move-self");
     }
 
     public void Update(KeyboardStateExtended keyboard, MouseStateExtended mouse)
@@ -123,7 +126,7 @@ public class Board
                     if (SelectedPiece.Tile != tile && SelectedPiece.ReachableTiles.Contains(tile))
                     {
                         Move move = new(this, SelectedPiece, tile);
-                        move.Make(false);
+                        move.Make(false, true);
                         Moves.Add(move);
                     }
                     else
@@ -137,9 +140,9 @@ public class Board
         }
 
         if (keyboard.IsKeyPressed(Keys.Left))
-            Moves.UnmakeOne(true);
+            Moves.UnmakeOne();
         else if (keyboard.IsKeyPressed(Keys.Right))
-            Moves.MakeOne(true);
+            Moves.MakeOne();
     }
 
     public void Draw(SpriteBatch spriteBatch)
@@ -168,12 +171,6 @@ public class Board
         ImGui.SeparatorText("Info");
         ImGui.Text($"{(IsWhiteTurn ? "White" : "Black")} to move");
         ImGui.Text($"Selected piece: {SelectedPiece}");
-        if (SelectedPiece != null && ImGui.TreeNodeEx("Reachable tiles", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            foreach (Tile tile in SelectedPiece.ReachableTiles)
-                ImGui.Text(tile.ToString());
-            ImGui.TreePop();
-        }
         if (ImGui.Button("Update reachable tiles"))
             UpdatePiecesReachableTiles();
         
@@ -209,6 +206,8 @@ public class Board
             piece.UpdateReachableTiles();
         }
     }
+
+    public King GetKing(bool white) => white ? WhiteKing : BlackKing;
 
     public Tile this[int tileX, int tileY]
     {

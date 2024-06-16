@@ -12,11 +12,11 @@ public class Bishop : Piece
     
     public override void UpdateReachableTiles()
     {
-        for (int x = -1; x < 1; x += 2)
+        for (int x = -1; x <= 1; x += 2)
         {
-            for (int y = -1; y < 1; y += 2)
+            for (int y = -1; y <= 1; y += 2)
             {
-                int offset = 0;
+                int offset = 1;
                 Tile tile = Board[TilePosition.X + x, TilePosition.Y + y];
 
                 while (tile != null)
@@ -28,8 +28,9 @@ public class Bishop : Piece
                         break;
                     }
                     ReachableTiles.Add(tile);
-                    
-                    tile = Board[TilePosition.X + x * ++offset, TilePosition.Y + y * ++offset];
+
+                    offset++;
+                    tile = Board[TilePosition.X + x * offset, TilePosition.Y + y * offset];
                 }
             }
         }

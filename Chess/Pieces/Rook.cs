@@ -12,16 +12,16 @@ public class Rook : Piece
     
     public override void UpdateReachableTiles()
     {
-        for (int x = -1; x < 1; x += 2)
+        for (int x = -1; x <= 1; x += 2)
             UpdateReachableTiles(x, 0);
         
-        for (int y = -1; y < 1; y += 2)
+        for (int y = -1; y <= 1; y += 2)
             UpdateReachableTiles(0, y);
     }
 
     private void UpdateReachableTiles(int x, int y)
     {
-        int offset = 0;
+        int offset = 1;
         Tile tile = Board[TilePosition.X + x, TilePosition.Y + y];
 
         while (tile != null)
@@ -34,7 +34,8 @@ public class Rook : Piece
             }
             ReachableTiles.Add(tile);
                     
-            tile = Board[TilePosition.X + x * ++offset, TilePosition.Y + y * ++offset];
+            offset++;
+            tile = Board[TilePosition.X + x * offset, TilePosition.Y + y * offset];
         }
     }
 }

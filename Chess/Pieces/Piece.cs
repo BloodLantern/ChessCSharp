@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Input;
@@ -8,6 +9,8 @@ namespace Chess.Pieces;
 
 public abstract class Piece
 {
+    private static Texture2D PiecesTexture { get; set; }
+    
     protected const float TextureSize = 150f;
     private const float TextureScale = 1f / TextureSize * Tile.Size;
     
@@ -23,8 +26,12 @@ public abstract class Piece
         get => tile;
         set
         {
+            if (tile != null)
+                tile.Piece = null;
+            
             tile = value;
             tile.Piece = this;
+            
             ResetPosition();
         }
     }
@@ -45,9 +52,14 @@ public abstract class Piece
         IsWhite = isWhite;
     }
 
+    internal static void LoadContent(ContentManager content)
+    {
+        PiecesTexture = content.Load<Texture2D>("pieces");
+    }
+
     public void Draw(SpriteBatch spriteBatch, Vector2 offset)
         => spriteBatch.Draw(
-            Board.PiecesTexture,
+            PiecesTexture,
             offset + Position,
             new RectangleF(TextureOffset, IsWhite ? 0f : TextureSize, TextureSize, TextureSize).ToRectangle(),
             Color.White,

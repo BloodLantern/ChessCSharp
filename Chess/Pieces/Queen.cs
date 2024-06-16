@@ -12,14 +12,14 @@ public class Queen : Piece
     
     public override void UpdateReachableTiles()
     {
-        for (int x = -1; x < 1; x++)
+        for (int x = -1; x <= 1; x++)
         {
-            for (int y = -1; y < 1; y++)
+            for (int y = -1; y <= 1; y++)
             {
                 if (x == 0 && y == 0)
                     continue;
                 
-                int offset = 0;
+                int offset = 1;
                 Tile tile = Board[TilePosition.X + x, TilePosition.Y + y];
 
                 while (tile != null)
@@ -32,7 +32,8 @@ public class Queen : Piece
                     }
                     ReachableTiles.Add(tile);
                     
-                    tile = Board[TilePosition.X + x * ++offset, TilePosition.Y + y * ++offset];
+                    offset++;
+                    tile = Board[TilePosition.X + x * offset, TilePosition.Y + y * offset];
                 }
             }
         }

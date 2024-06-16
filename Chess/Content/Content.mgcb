@@ -43,17 +43,11 @@
 /processorParam:Quality=Best
 /build:audio/move-check.mp3
 
-#begin audio/move-opponent.mp3
+#begin audio/move.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:audio/move-opponent.mp3
-
-#begin audio/move-self.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:audio/move-self.mp3
+/build:audio/move.mp3
 
 #begin audio/premove.mp3
 /importer:Mp3Importer

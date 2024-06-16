@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Chess.Pieces;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using MonoGame.Utils;
 using MonoGame.Utils.Extensions;
 
@@ -10,6 +13,12 @@ namespace Chess;
 
 public class Move
 {
+    private static SoundEffect BaseSfx { get; set; }
+    private static SoundEffect CaptureSfx { get; set; }
+    private static SoundEffect CastleSfx { get; set; }
+    private static SoundEffect CheckSfx { get; set; }
+    private static SoundEffect PromoteSfx { get; set; }
+    
     public Piece Piece { get; }
     
     public Tile Origin { get; }
@@ -18,9 +27,15 @@ public class Move
     private Board Board { get; }
     private Piece DestinationPiece { get; }
     
+    private SoundEffect Sfx { get; }
+    
     public bool Made { get; private set; }
     
     public bool FirstPieceMove { get; }
+    public bool IsCapture { get; }
+    public bool IsCastle { get; }
+    public bool IsCheck { get; }
+    public bool IsPromote { get; }
 
     public Move(Board board, Piece piece, Tile destination)
         : this(board, piece, piece.Tile, destination)
@@ -35,32 +50,70 @@ public class Move
         Destination = destination ?? throw new ArgumentNullException(nameof(destination));
 
         DestinationPiece = Destination.Piece;
-        FirstPieceMove = !piece.HasMoved;
+
+        Sfx = BaseSfx;
+        
+        FirstPieceMove = !Piece.HasMoved;
+        IsCapture = DestinationPiece != null;
+        IsPromote = Piece is Pawn && Destination.TilePosition.Y is 0 or 7;
+
+        // Make the move. If the piece can now capture the king, consider the current move as putting the king in check
+        Make(false, false);
+        List<Tile> oldReachableTiles = [..Piece.ReachableTiles];
+        Piece.ReachableTiles.Clear();
+        Piece.UpdateReachableTiles();
+        if (Piece.ReachableTiles.Contains(Board.GetKing(!Piece.IsWhite).Tile))
+            IsCheck = true;
+        Piece.ReachableTiles.Clear();
+        Piece.ReachableTiles.AddRange(oldReachableTiles);
+        Unmake(false, false);
+
+        if (IsCapture)
+            Sfx = CaptureSfx;
+        if (IsPromote)
+            Sfx = PromoteSfx;
+        if (IsCheck)
+            Sfx = CheckSfx;
     }
 
-    public void Make(bool animated)
+    internal static void LoadContent(ContentManager content)
     {
-        if (!animated)
+        BaseSfx = content.Load<SoundEffect>("audio/move");
+        CaptureSfx = content.Load<SoundEffect>("audio/capture");
+        CastleSfx = content.Load<SoundEffect>("audio/castle");
+        CheckSfx = content.Load<SoundEffect>("audio/move-check");
+        PromoteSfx = content.Load<SoundEffect>("audio/promote");
+    }
+
+    public void Make(bool playAnimation, bool playSfx)
+    {
+        if (playSfx)
+            Sfx.Play();
+        
+        if (!playAnimation)
             RemoveDestinationPiece();
 
         Piece.Tile = Destination;
         Piece.HasMoved = true;
 
-        if (animated)
+        if (playAnimation)
             Coroutine.Start(AnimationRoutine(Origin, Destination));
 
         Made = true;
     }
 
-    public void Unmake(bool animated)
+    public void Unmake(bool playAnimation, bool playSfx)
     {
+        if (playSfx)
+            Sfx.Play();
+
         Piece.Tile = Origin;
         AddDestinationPiece();
 
         if (FirstPieceMove)
             Piece.HasMoved = false;
 
-        if (animated)
+        if (playAnimation)
             Coroutine.Start(AnimationRoutine(Destination, Origin));
 
         Made = false;

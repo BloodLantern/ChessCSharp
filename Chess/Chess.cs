@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Chess.Pieces;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Input;
@@ -56,7 +57,9 @@ public class Chess : Game
         spriteBatch = new(GraphicsDevice);
 
         font = Content.Load<SpriteFont>("font");
-        board.LoadContent(Content);
+        Board.LoadContent(Content);
+        Piece.LoadContent(Content);
+        Move.LoadContent(Content);
 
         imGuiRenderer.RebuildFontAtlas();
     }

@@ -30,14 +30,14 @@ public class MoveList : IEnumerable<Move>
         OnMoveAdded?.Invoke(move);
     }
 
-    public void MakeOne(bool animated)
+    public void MakeOne()
     {
         if (CurrentIsLastMove)
             return;
         
         foreach (Move move in List.Where(move => !move.Made))
         {
-            move.Make(animated);
+            move.Make(true, true);
             OnMoveMade?.Invoke(move);
             break;
         }
@@ -45,7 +45,7 @@ public class MoveList : IEnumerable<Move>
         CurrentIndex++;
     }
 
-    public void UnmakeOne(bool animated)
+    public void UnmakeOne()
     {
         if (CurrentIndex == -1)
             return;
@@ -56,7 +56,7 @@ public class MoveList : IEnumerable<Move>
             if (!move.Made)
                 continue;
                 
-            move.Unmake(animated);
+            move.Unmake(true, true);
             OnMoveUnmade?.Invoke(move);
             break;
         }
@@ -68,7 +68,7 @@ public class MoveList : IEnumerable<Move>
     {
         foreach (Move move in List.Where(move => !move.Made))
         {
-            move.Make(false);
+            move.Make(false, false);
             OnMoveMade?.Invoke(move);
         }
     }
@@ -81,7 +81,7 @@ public class MoveList : IEnumerable<Move>
             if (!move.Made)
                 continue;
                 
-            move.Unmake(false);
+            move.Unmake(false, false);
             OnMoveUnmade?.Invoke(move);
         }
     }
