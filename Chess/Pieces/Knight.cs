@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace Chess.Pieces;
 
@@ -12,7 +13,7 @@ public class Knight : Piece
     {
     }
     
-    public override void UpdateReachableTiles()
+    public override List<Tile> GetReachableTiles()
     {
         Point up = new(TilePosition.X, TilePosition.Y - 2);
         Point down = new(TilePosition.X, TilePosition.Y + 2);
@@ -30,6 +31,8 @@ public class Knight : Piece
             Board[right.X, right.Y - 1], // Right-up
             Board[right.X, right.Y + 1], // Right-down
         ];
+        
+        List<Tile> result = [];
 
         foreach (Tile tile in tiles)
         {
@@ -37,7 +40,9 @@ public class Knight : Piece
                 continue;
             
             if (!tile.HasPiece || tile.Piece.IsEnemyOf(this))
-                ReachableTiles.Add(tile);
+                result.Add(tile);
         }
+
+        return result;
     }
 }

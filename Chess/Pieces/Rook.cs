@@ -1,4 +1,6 @@
-﻿namespace Chess.Pieces;
+﻿using System.Collections.Generic;
+
+namespace Chess.Pieces;
 
 public class Rook : Piece
 {
@@ -10,16 +12,20 @@ public class Rook : Piece
     {
     }
     
-    public override void UpdateReachableTiles()
+    public override List<Tile> GetReachableTiles()
     {
+        List<Tile> tiles = [];
+
         for (int x = -1; x <= 1; x += 2)
-            UpdateReachableTiles(x, 0);
+            GetReachableTiles(tiles, x, 0);
         
         for (int y = -1; y <= 1; y += 2)
-            UpdateReachableTiles(0, y);
+            GetReachableTiles(tiles, 0, y);
+
+        return tiles;
     }
 
-    private void UpdateReachableTiles(int x, int y)
+    private void GetReachableTiles(List<Tile> tiles, int x, int y)
     {
         int offset = 1;
         Tile tile = Board[TilePosition.X + x, TilePosition.Y + y];
@@ -29,10 +35,10 @@ public class Rook : Piece
             if (tile.HasPiece)
             {
                 if (tile.Piece.IsEnemyOf(this))
-                    ReachableTiles.Add(tile);
+                    tiles.Add(tile);
                 break;
             }
-            ReachableTiles.Add(tile);
+            tiles.Add(tile);
                     
             offset++;
             tile = Board[TilePosition.X + x * offset, TilePosition.Y + y * offset];

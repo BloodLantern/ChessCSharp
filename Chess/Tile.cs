@@ -18,14 +18,14 @@ public class Tile
     
     public const float Size = 110f;
 
-    private static readonly Color WhiteColor = Color.Transparent;
-    private static readonly Color BlackColor = Color.Transparent;
-    private static readonly Color RedWhiteColor = new(0xEB, 0x78, 0x63);
-    private static readonly Color RedBlackColor = new(0xE1, 0x68, 0x54);
-    private static readonly Color GreenWhiteColor = new(0xB8, 0xCF, 0x6A);
-    private static readonly Color GreenBlackColor = new(0xAE, 0xBF, 0x5B);
+    public static Color WhiteColor { get; } = new(0xF0, 0xD9, 0xB5);
+    public static Color BlackColor { get; } = new(0xB5, 0x88, 0x63);
+    public static Color RedWhiteColor { get; } = new(0xEB, 0x78, 0x63);
+    public static Color RedBlackColor { get; } = new(0xE1, 0x68, 0x54);
+    public static Color GreenWhiteColor { get; } = new(0xB8, 0xCF, 0x6A);
+    public static Color GreenBlackColor { get; } = new(0xAE, 0xBF, 0x5B);
 
-    private const string RowLetters = "abcdefgh";
+    public const string RowLetters = "abcdefgh";
 
     public bool IsWhite { get; }
 
@@ -52,9 +52,9 @@ public class Tile
         set
         {
             state = state == value ? SelectionState.Default : value;
-            drawColor = state switch
+            DrawColor = state switch
             {
-                SelectionState.Default => IsWhite ? WhiteColor : BlackColor,
+                SelectionState.Default => Color.Transparent,
                 SelectionState.RedSelection => IsWhite ? RedWhiteColor : RedBlackColor,
                 SelectionState.GreenSelection => IsWhite ? GreenWhiteColor : GreenBlackColor,
                 _ => throw new ArgumentException($"Invalid {nameof(SelectionState)} set to {nameof(Tile)}: {state}")
@@ -64,22 +64,21 @@ public class Tile
 
     public bool HasPiece => Piece != null;
 
-    private Color drawColor;
+    private Color DrawColor { get; set; } = Color.Transparent;
 
     public Tile(Board board, Point tilePosition, bool isWhite)
     {
         Board = board;
         TilePosition = tilePosition;
         IsWhite = isWhite;
-        drawColor = isWhite ? WhiteColor : BlackColor;
     }
 
     public void Draw(SpriteBatch spriteBatch, Vector2 offset)
     {
-        if (drawColor == Color.Transparent)
+        if (DrawColor == Color.Transparent)
             return;
         
-        spriteBatch.DrawRectangle(offset + Position, new(Size, Size), drawColor, Size * 0.5f);
+        spriteBatch.DrawRectangle(offset + Position, new(Size, Size), DrawColor, Size * 0.5f);
     }
 
     public void Update(KeyboardStateExtended keyboard, MouseStateExtended mouse)

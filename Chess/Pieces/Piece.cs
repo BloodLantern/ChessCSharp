@@ -41,9 +41,11 @@ public abstract class Piece
     public Vector2 Position { get; set; }
     public Point TilePosition => Tile.TilePosition;
 
-    public List<Tile> ReachableTiles { get; } = [];
+    public List<Tile> ReachableTiles { get; private set; } = [];
     
     public bool HasMoved { get; set; }
+    
+    public bool IsPinned { get; private set; }
 
     protected Piece(Board board, Tile tile, bool isWhite)
     {
@@ -55,6 +57,18 @@ public abstract class Piece
     internal static void LoadContent(ContentManager content)
     {
         PiecesTexture = content.Load<Texture2D>("pieces");
+    }
+
+    public virtual void Initialize()
+    {
+    }
+
+    public void Update(MouseStateExtended mouse)
+    {
+        if (!(mouse.IsButtonPressed(MouseButton.Left) && Tile.ScreenArea.Contains(mouse.Position)) || Board.IsWhiteTurn != IsWhite)
+            return;
+
+        Board.SelectedPiece = this;
     }
 
     public void Draw(SpriteBatch spriteBatch, Vector2 offset)
@@ -70,17 +84,11 @@ public abstract class Piece
             0f
         );
 
-    public void Update(MouseStateExtended mouse)
-    {
-        if (!(mouse.IsButtonPressed(MouseButton.Left) && Tile.ScreenArea.Contains(mouse.Position)) || Board.IsWhiteTurn != IsWhite)
-            return;
-
-        Board.SelectedPiece = this;
-    }
-
     public void ResetPosition() => Position = Tile.Position + Vector2.One * Tile.Size * 0.5f;
 
-    public abstract void UpdateReachableTiles();
+    public abstract List<Tile> GetReachableTiles();
+
+    public void UpdateReachableTiles() => ReachableTiles = GetReachableTiles();
 
     public bool IsEnemyOf(Piece other) => IsWhite != other.IsWhite;
 

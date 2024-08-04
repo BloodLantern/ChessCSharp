@@ -1,4 +1,6 @@
-﻿namespace Chess.Pieces;
+﻿using System.Collections.Generic;
+
+namespace Chess.Pieces;
 
 public class Bishop : Piece
 {
@@ -10,8 +12,10 @@ public class Bishop : Piece
     {
     }
     
-    public override void UpdateReachableTiles()
+    public override List<Tile> GetReachableTiles()
     {
+        List<Tile> tiles = [];
+        
         for (int x = -1; x <= 1; x += 2)
         {
             for (int y = -1; y <= 1; y += 2)
@@ -24,15 +28,17 @@ public class Bishop : Piece
                     if (tile.HasPiece)
                     {
                         if (tile.Piece.IsEnemyOf(this))
-                            ReachableTiles.Add(tile);
+                            tiles.Add(tile);
                         break;
                     }
-                    ReachableTiles.Add(tile);
+                    tiles.Add(tile);
 
                     offset++;
                     tile = Board[TilePosition.X + x * offset, TilePosition.Y + y * offset];
                 }
             }
         }
+        
+        return tiles;
     }
 }

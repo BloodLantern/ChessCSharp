@@ -10,58 +10,58 @@ namespace Chess;
 
 public class Chess : Game
 {
-    public static Chess Instance;
+    public static Chess Instance { get; private set; }
     
-    private readonly GraphicsDeviceManager graphics;
-    private SpriteBatch spriteBatch;
-    private ImGuiRenderer imGuiRenderer;
+    public GraphicsDeviceManager Graphics { get; }
+    public SpriteBatch SpriteBatch { get; private set; }
+    public ImGuiRenderer ImGuiRenderer { get; private set; }
 
-    private FramesPerSecondCounterComponent fpsCounter;
+    public FramesPerSecondCounterComponent FpsCounter { get; private set; }
 
-    public int WindowWidth { get => Window.ClientBounds.Width; init => graphics.PreferredBackBufferWidth = value; }
-    public int WindowHeight { get => Window.ClientBounds.Height; init => graphics.PreferredBackBufferHeight = value; }
+    public int WindowWidth { get => Window.ClientBounds.Width; init => Graphics.PreferredBackBufferWidth = value; }
+    public int WindowHeight { get => Window.ClientBounds.Height; init => Graphics.PreferredBackBufferHeight = value; }
     public Point WindowSize => Window.ClientBounds.Size;
 
-    private SpriteFont font;
+    public SpriteFont Font { get; private set; }
 
-    private Board board;
+    public Board Board { get; private set; }
 
     public Chess()
     {
         Instance = this;
         
-        graphics = new(this);
+        Graphics = new(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
         WindowWidth = 1600;
         WindowHeight = 900;
         IsFixedTimeStep = false;
-        graphics.SynchronizeWithVerticalRetrace = true;
+        Graphics.SynchronizeWithVerticalRetrace = true;
         Window.AllowUserResizing = true;
     }
 
     protected override void Initialize()
     {
-        imGuiRenderer = new(this);
+        ImGuiRenderer = new(this);
         
-        board = new();
+        Board = new(this);
         
-        Components.Add(fpsCounter = new(this));
+        Components.Add(FpsCounter = new(this));
 
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
-        spriteBatch = new(GraphicsDevice);
+        SpriteBatch = new(GraphicsDevice);
 
-        font = Content.Load<SpriteFont>("font");
+        Font = Content.Load<SpriteFont>("font");
         Board.LoadContent(Content);
         Piece.LoadContent(Content);
         Move.LoadContent(Content);
 
-        imGuiRenderer.RebuildFontAtlas();
+        ImGuiRenderer.RebuildFontAtlas();
     }
 
     protected override void Update(GameTime gameTime)
@@ -74,7 +74,7 @@ public class Chess : Game
             KeyboardStateExtended keyboard = KeyboardExtended.GetState();
             MouseStateExtended mouse = MouseExtended.GetState();
 
-            board.Update(keyboard, mouse);
+            Board.Update(keyboard, mouse);
         }
         
         foreach (IGameComponent component in Components)
@@ -99,11 +99,11 @@ public class Chess : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        imGuiRenderer.BeginLayout(gameTime);
+        ImGuiRenderer.BeginLayout(gameTime);
 
-        spriteBatch.Begin();
+        SpriteBatch.Begin();
         
-        board.Draw(spriteBatch);
+        Board.Draw(SpriteBatch);
         
         foreach (IGameComponent component in Components)
         {
@@ -118,12 +118,12 @@ public class Chess : Game
             }
         }
         
-        spriteBatch.DrawString(font, $"FPS: {fpsCounter.FramesPerSecond}", Vector2.Zero, Color.White);
+        SpriteBatch.DrawString(Font, $"FPS: {FpsCounter.FramesPerSecond}", Vector2.Zero, Color.White);
         
-        spriteBatch.End();
+        SpriteBatch.End();
 
         base.Draw(gameTime);
         
-        imGuiRenderer.EndLayout();
+        ImGuiRenderer.EndLayout();
     }
 }

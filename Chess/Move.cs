@@ -32,6 +32,7 @@ public class Move
     public bool Made { get; private set; }
     
     public bool FirstPieceMove { get; }
+    
     public bool IsCapture { get; }
     public bool IsCastle { get; }
     public bool IsCheck { get; }
@@ -54,24 +55,23 @@ public class Move
         Sfx = BaseSfx;
         
         FirstPieceMove = !Piece.HasMoved;
+        
         IsCapture = DestinationPiece != null;
         IsPromote = Piece is Pawn && Destination.TilePosition.Y is 0 or 7;
 
-        // Make the move. If the piece can now capture the king, consider the current move as putting the king in check
+        // If after the move is made the piece can now capture the enemy king, consider the current move as putting the king in check
+        // However, if the ally king is instead put in check, consider the current move as illegal
         Make(false, false);
-        List<Tile> oldReachableTiles = [..Piece.ReachableTiles];
-        Piece.ReachableTiles.Clear();
-        Piece.UpdateReachableTiles();
-        if (Piece.ReachableTiles.Contains(Board.GetKing(!Piece.IsWhite).Tile))
+        List<Tile> newReachableTiles = Piece.GetReachableTiles();
+        if (newReachableTiles.Contains(Board.GetKing(!Piece.IsWhite).Tile))
             IsCheck = true;
-        Piece.ReachableTiles.Clear();
-        Piece.ReachableTiles.AddRange(oldReachableTiles);
         Unmake(false, false);
 
         if (IsCapture)
             Sfx = CaptureSfx;
         if (IsPromote)
             Sfx = PromoteSfx;
+        // Castling
         if (IsCheck)
             Sfx = CheckSfx;
     }

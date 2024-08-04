@@ -13,15 +13,13 @@ namespace Chess;
 public class Board
 {
     public const int TileSize = 8;
-    public const int FirstTileIndex = 0;
-    public const int LastTileIndex = TileSize - 1;
     public const float Size = Tile.Size * TileSize;
 
     private static Texture2D Texture { get; set; }
     private static Texture2D ReachableTileTexture { get; set; }
     private static Texture2D ReachableTileEnemyTexture { get; set; }
 
-    public static Vector2 DrawOffset => Chess.Instance.WindowSize.ToVector2() * 0.5f - Vector2.One * Size * 0.5f;
+    public Vector2 DrawOffset => Chess.WindowSize.ToVector2() * 0.5f - Vector2.One * Size * 0.5f;
     
     public Tile[,] Tiles { get; } = new Tile[TileSize, TileSize];
     public List<Piece> Pieces { get; } = [];
@@ -30,7 +28,7 @@ public class Board
     public Piece SelectedPiece { get; set; }
     
     public static RectangleF Area => new(Vector2.Zero, Vector2.One * Size);
-    public static RectangleF ScreenArea
+    public RectangleF ScreenArea
     {
         get
         {
@@ -46,9 +44,13 @@ public class Board
     
     public King WhiteKing { get; }
     public King BlackKing { get; }
+    
+    private Chess Chess { get; }
 
-    public Board()
+    public Board(Chess chess)
     {
+        Chess = chess;
+        
         for (int x = 0; x < TileSize; x++)
         {
             for (int y = 0; y < TileSize; y++)
@@ -58,29 +60,32 @@ public class Board
         for (int i = 0; i < 2; i++)
         {
             bool black = i == 0;
-            int y = black ? FirstTileIndex : LastTileIndex;
+            int y = black ? 0 : 7;
             
-            Pieces.Add(new Rook(this, Tiles[FirstTileIndex + 0, y], !black));
-            Pieces.Add(new Knight(this, Tiles[FirstTileIndex + 1, y], !black));
-            Pieces.Add(new Bishop(this, Tiles[FirstTileIndex + 2, y], !black));
-            Pieces.Add(new Queen(this, Tiles[FirstTileIndex + 3, y], !black));
+            Pieces.Add(new Rook(this, Tiles[0, y], !black));
+            Pieces.Add(new Knight(this, Tiles[1, y], !black));
+            Pieces.Add(new Bishop(this, Tiles[2, y], !black));
+            Pieces.Add(new Queen(this, Tiles[3, y], !black));
             
-            King king = new(this, Tiles[LastTileIndex - 3, y], !black);
+            King king = new(this, Tiles[4, y], !black);
             if (black)
                 BlackKing = king;
             else
                 WhiteKing = king;
             Pieces.Add(king);
             
-            Pieces.Add(new Bishop(this, Tiles[LastTileIndex - 2, y], !black));
-            Pieces.Add(new Knight(this, Tiles[LastTileIndex - 1, y], !black));
-            Pieces.Add(new Rook(this, Tiles[LastTileIndex - 0, y], !black));
+            Pieces.Add(new Bishop(this, Tiles[5, y], !black));
+            Pieces.Add(new Knight(this, Tiles[6, y], !black));
+            Pieces.Add(new Rook(this, Tiles[7, y], !black));
             
             for (int j = 0; j < TileSize; j++)
-                Pieces.Add(new Pawn(this, Tiles[j, black ? FirstTileIndex + 1 : LastTileIndex - 1], !black));
+                Pieces.Add(new Pawn(this, Tiles[j, black ? 1 : 6], !black));
         }
 
         UpdatePiecesReachableTiles();
+
+        foreach (Piece piece in Pieces)
+            piece.Initialize();
 
         Moves.OnMoveAdded += _ =>
         {
@@ -149,6 +154,20 @@ public class Board
     {
         spriteBatch.Draw(Texture, DrawOffset, Color.White);
         
+        // Draw tile numbers
+        for (int i = 0; i < TileSize; i++)
+        {
+            Tile tile = Tiles[0, i];
+            spriteBatch.DrawString(Chess.Font, (TileSize - i).ToString(), DrawOffset + Vector2.UnitY * i * Tile.Size + Vector2.UnitX * Tile.Size * 0.05f, tile.IsWhite ? Tile.BlackColor : Tile.WhiteColor);
+        }
+        
+        // Draw tile letters
+        for (int i = 0; i < TileSize; i++)
+        {
+            Tile tile = Tiles[i, 7];
+            spriteBatch.DrawString(Chess.Font, Tile.RowLetters[i].ToString(), DrawOffset + new Vector2(i, 7) * Tile.Size + Vector2.One * Tile.Size * 0.65f + Vector2.UnitX * Tile.Size * 0.15f, tile.IsWhite ? Tile.BlackColor : Tile.WhiteColor);
+        }
+
         foreach (Tile tile in Tiles)
             tile.Draw(spriteBatch, DrawOffset);
 
@@ -201,10 +220,7 @@ public class Board
     private void UpdatePiecesReachableTiles()
     {
         foreach (Piece piece in Pieces)
-        {
-            piece.ReachableTiles.Clear();
             piece.UpdateReachableTiles();
-        }
     }
 
     public King GetKing(bool white) => white ? WhiteKing : BlackKing;
